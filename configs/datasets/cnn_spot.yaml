@@ -1,0 +1,32 @@
+INPUT:
+  SIZE: (224, 224)
+  TRANSFORMS: ["random_flip",  "gaussian_blur", "gaussian_noise", "backbone_preprocessing"]
+  # Add gaussian noise epoch
+  # [1/20] batch [10/22503] time 25.985 (31.812) data 0.013 (2.969) loss 0.6889 (0.6919)
+  # acc 56.2500 (53.7500) -> drop from 90 (60) to 56 (53) -> may be hard to learn
+  # -> visualize gaussian noise
+  # lr 2.0000e-03 eta 165 days, 16:58:58
+  # For test/evaluation
+  # TRANSFORMS: ["gaussian_blur", "backbone_preprocessing"]
+    # sigma range, kernel range
+  # TRANSFORMS: ["colorjitter", "backbone_preprocessing"]
+    # _C.INPUT.COLORJITTER_B = 0.4 else 0
+    # _C.INPUT.COLORJITTER_C = 0.4 else 0
+    # _C.INPUT.COLORJITTER_S = 0.4 else 0
+  # TRANSFORMS: ["gaussian_noise", "backbone_preprocessing"]
+    # mean, std range
+  # TRANSFORMS: ["jpeg_compression", "backbone_preprocessing"]
+    # quality range
+  # Resize robustness, but feature extractors do not support?
+
+DATASET:
+  NAME: "CNNSpot"
+  # For test/evaluation
+  # NAME: "Truefake"
+
+MODEL:
+  BACKBONE:
+    NAME: "fused_cnn_resnet50_clip_vit"
+  HEAD:
+    NAME: "binary_classifier"
+    DROPOUT: 0.2

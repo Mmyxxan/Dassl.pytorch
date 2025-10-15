@@ -239,7 +239,7 @@ def open_specified_layers(model, open_layers):
                 p.requires_grad = False
 
 
-def count_num_param(model=None, params=None):
+def count_num_param(model=None, params=None, trainable_only=False):
     r"""Count number of parameters in a model.
 
     Args:
@@ -250,15 +250,20 @@ def count_num_param(model=None, params=None):
     """
 
     if model is not None:
-        return sum(p.numel() for p in model.parameters())
+        return sum(
+            p.numel() for p in model.parameters()
+            if not trainable_only or p.requires_grad
+        )
 
     if params is not None:
         s = 0
         for p in params:
             if isinstance(p, dict):
-                s += p["params"].numel()
+                param = p["params"]
             else:
-                s += p.numel()
+                param = p
+            if not trainable_only or param.requires_grad:
+                s += param.numel()
         return s
 
     raise ValueError("model and params must provide at least one.")

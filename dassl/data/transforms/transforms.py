@@ -3,19 +3,23 @@ import random
 import torch
 import torchvision.transforms.functional as F
 from torchvision.transforms import (
-    Resize, Compose, ToTensor, Normalize, CenterCrop, RandomCrop, ColorJitter,
+    Resize, Compose, ToTensor, ToPILImage, Normalize, CenterCrop, RandomCrop, ColorJitter,
     RandomApply, GaussianBlur, RandomGrayscale, RandomResizedCrop,
     RandomHorizontalFlip
 )
+from torchvision.transforms.v2 import GaussianNoise, JPEG
 from torchvision.transforms.functional import InterpolationMode
 
 from .autoaugment import SVHNPolicy, CIFAR10Policy, ImageNetPolicy
 from .randaugment import RandAugment, RandAugment2, RandAugmentFixMatch
 
+from dassl.modeling import FusedBackbone
+
 AVAI_CHOICES = [
     "random_flip",
     "random_resized_crop",
     "normalize",
+    "backbone_preprocessing",
     "instance_norm",
     "random_crop",
     "random_translation",
@@ -31,6 +35,7 @@ AVAI_CHOICES = [
     "colorjitter",
     "randomgrayscale",
     "gaussian_blur",
+    "jpeg_compression",
 ]
 
 INTERPOLATION_MODES = {
@@ -39,6 +44,9 @@ INTERPOLATION_MODES = {
     "nearest": InterpolationMode.NEAREST,
 }
 
+MODEL_TRANSFORMS = {
+    "fused_cnn_resnet50_clip_vit": FusedBackbone.preprocess
+}
 
 class Random2DTranslation:
     """Given an image of (height, width), we resize it to
@@ -158,19 +166,40 @@ class Cutout:
         return img * mask
 
 
-class GaussianNoise:
-    """Add gaussian noise."""
+# class GaussianNoise:
+#     """Add gaussian noise."""
 
-    def __init__(self, mean=0, std=0.15, p=0.5):
-        self.mean = mean
-        self.std = std
-        self.p = p
+#     def __init__(self, mean=0, std=0.15, p=0.5):
+#         self.mean = mean
+#         self.std = std
+#         self.p = p
+
+#     def __call__(self, img):
+#         if random.uniform(0, 1) > self.p:
+#             return img
+#         noise = torch.randn(img.size()) * self.std + self.mean
+#         return img + noise
+
+
+class ApplyJPEG:
+    def __init__(self, quality=(30, 70)):
+        self.jpeg = JPEG(quality=quality)
+        self.to_tensor = ToTensor()
+        self.to_pil = ToPILImage()
 
     def __call__(self, img):
-        if random.uniform(0, 1) > self.p:
-            return img
-        noise = torch.randn(img.size()) * self.std + self.mean
-        return img + noise
+        # img: PIL Image
+        # Convert PIL to uint8 tensor (C,H,W) on CPU
+        img_uint8 = torch.as_tensor(
+            torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes()))
+        ).view(img.size[1], img.size[0], len(img.getbands())).permute(2, 0, 1).contiguous()
+
+        # Apply JPEG compression/decompression
+        img_jpeg = self.jpeg(img_uint8)
+
+        # Convert back to PIL Image for downstream pipeline
+        img_pil = self.to_pil(img_jpeg)
+        return img_pil
 
 
 def build_transform(cfg, is_train=True, choices=None):
@@ -293,6 +322,10 @@ def _build_transform_train(cfg, choices, target_size, normalize):
         gb_k, gb_p = cfg.INPUT.GB_K, cfg.INPUT.GB_P
         tfm_train += [RandomApply([GaussianBlur(gb_k)], p=gb_p)]
 
+    if "jpeg_compression" in choices:
+        print(f"+ JPEG compression (quality={cfg.INPUT.JPEG_QUALITY})")
+        tfm_train += [JPEG(quality=cfg.INPUT.JPEG_QUALITY)]
+
     print("+ to torch tensor of range [0, 1]")
     tfm_train += [ToTensor()]
 
@@ -302,17 +335,25 @@ def _build_transform_train(cfg, choices, target_size, normalize):
         print(f"+ cutout (n_holes={cutout_n}, length={cutout_len})")
         tfm_train += [Cutout(cutout_n, cutout_len)]
 
+    if "gaussian_noise" in choices:
+        print(f"+ gaussian noise (mean={cfg.INPUT.GN_MEAN}, sigma={cfg.INPUT.GN_STD})")
+        tfm_train += [GaussianNoise(mean=cfg.INPUT.GN_MEAN, sigma=cfg.INPUT.GN_STD)]
+
+    if "backbone_preprocessing" in choices:
+        print("+ normalization per backbone")
+        tfm_train += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
+
     if "normalize" in choices:
         print(
             f"+ normalization (mean={cfg.INPUT.PIXEL_MEAN}, std={cfg.INPUT.PIXEL_STD})"
         )
         tfm_train += [normalize]
 
-    if "gaussian_noise" in choices:
-        print(
-            f"+ gaussian noise (mean={cfg.INPUT.GN_MEAN}, std={cfg.INPUT.GN_STD})"
-        )
-        tfm_train += [GaussianNoise(cfg.INPUT.GN_MEAN, cfg.INPUT.GN_STD)]
+    # if "gaussian_noise" in choices:
+    #     print(
+    #         f"+ gaussian noise (mean={cfg.INPUT.GN_MEAN}, std={cfg.INPUT.GN_STD})"
+    #     )
+    #     tfm_train += [GaussianNoise(cfg.INPUT.GN_MEAN, cfg.INPUT.GN_STD)]
 
     if "instance_norm" in choices:
         print("+ instance normalization")
@@ -336,8 +377,20 @@ def _build_transform_test(cfg, choices, target_size, normalize):
     print(f"+ {target_size} center crop")
     tfm_test += [CenterCrop(input_size)]
 
+    # if "jpeg_compression" in choices:
+    #     print(f"+ JPEG compression (quality={cfg.INPUT.JPEG_QUALITY})")
+    #     tfm_test += [JPEG(quality=cfg.INPUT.JPEG_QUALITY)]
+
     print("+ to torch tensor of range [0, 1]")
     tfm_test += [ToTensor()]
+
+    # if "gaussian_noise" in choices:
+    #     print(f"+ gaussian noise (mean={cfg.INPUT.GN_MEAN}, sigma={cfg.INPUT.GN_STD})")
+    #     tfm_test += [GaussianNoise(mean=cfg.INPUT.GN_MEAN, sigma=cfg.INPUT.GN_STD)]
+
+    if "backbone_preprocessing" in choices:
+        print("+ normalization per backbone")
+        tfm_test += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
 
     if "normalize" in choices:
         print(

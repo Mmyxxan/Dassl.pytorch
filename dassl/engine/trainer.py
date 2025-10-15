@@ -372,7 +372,7 @@ class SimpleTrainer(TrainerBase):
         if cfg.MODEL.INIT_WEIGHTS:
             load_pretrained_weights(self.model, cfg.MODEL.INIT_WEIGHTS)
         self.model.to(self.device)
-        print(f"# params: {count_num_param(self.model):,}")
+        print(f"# params: {count_num_param(self.model, trainable_only=True):,}")
         self.optim = build_optimizer(self.model, cfg.OPTIM)
         self.sched = build_lr_scheduler(self.optim, cfg.OPTIM)
         self.register_model("model", self.model, self.optim, self.sched)

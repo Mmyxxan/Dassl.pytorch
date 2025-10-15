@@ -57,6 +57,8 @@ _C.INPUT.RGS_P = 0.2
 # Gaussian blur
 _C.INPUT.GB_P = 0.5  # propability of applying this operation
 _C.INPUT.GB_K = 21  # kernel size (should be an odd number)
+# Jpeg compression
+_C.INPUT.JPEG_QUALITY = 65
 
 ###########################
 # Dataset

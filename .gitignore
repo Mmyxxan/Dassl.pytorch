@@ -137,3 +137,4 @@ dmypy.json
 # This project
 output/
 debug/
+/dassl/data/datasets/cnn_spot

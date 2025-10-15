@@ -230,6 +230,7 @@ class DatasetWrapper(TorchDataset):
         img0 = read_image(item.impath)
 
         if self.transform is not None:
+            assert not isinstance(self.transform, (list, tuple))
             if isinstance(self.transform, (list, tuple)):
                 for i, tfm in enumerate(self.transform):
                     img = self._transform_image(tfm, img0)
