@@ -479,7 +479,11 @@ class SimpleTrainer(TrainerBase):
         input = batch["img"]
         label = batch["label"]
 
-        input = input.to(self.device)
+        if isinstance(input, list):
+            input = [x.to(self.device) for x in input]
+        else:
+            input = input.to(self.device)
+            
         label = label.to(self.device)
 
         return input, label
