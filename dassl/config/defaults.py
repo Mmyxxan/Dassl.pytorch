@@ -102,7 +102,7 @@ _C.DATALOADER.RETURN_IMG0 = False
 # Setting for the train_x data-loader
 _C.DATALOADER.TRAIN_X = CN()
 _C.DATALOADER.TRAIN_X.SAMPLER = "RandomSampler"
-_C.DATALOADER.TRAIN_X.BATCH_SIZE = 32
+_C.DATALOADER.TRAIN_X.BATCH_SIZE = 128
 # Parameter for RandomDomainSampler
 # 0 or -1 means sampling from all domains
 _C.DATALOADER.TRAIN_X.N_DOMAIN = 0
