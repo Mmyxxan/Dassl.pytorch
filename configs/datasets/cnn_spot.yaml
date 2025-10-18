@@ -1,6 +1,6 @@
 INPUT:
   SIZE: (224, 224)
-  TRANSFORMS: ["random_flip",  "gaussian_blur", "gaussian_noise", "backbone_preprocessing"]
+  TRANSFORMS: ["random_flip",  "gaussian_blur", "jpeg_compression", "backbone_preprocessing"]
   # Add gaussian noise epoch
   # [1/20] batch [10/22503] time 25.985 (31.812) data 0.013 (2.969) loss 0.6889 (0.6919)
   # acc 56.2500 (53.7500) -> drop from 90 (60) to 56 (53) -> may be hard to learn

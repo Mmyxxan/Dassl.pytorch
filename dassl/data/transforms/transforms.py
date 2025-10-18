@@ -7,7 +7,7 @@ from torchvision.transforms import (
     RandomApply, GaussianBlur, RandomGrayscale, RandomResizedCrop,
     RandomHorizontalFlip
 )
-from torchvision.transforms.v2 import GaussianNoise, JPEG
+from torchvision.transforms.v2 import GaussianNoise, JPEG, ToImage, ToPILImage
 from torchvision.transforms.functional import InterpolationMode
 
 from .autoaugment import SVHNPolicy, CIFAR10Policy, ImageNetPolicy
@@ -182,24 +182,28 @@ class Cutout:
 
 
 class ApplyJPEG:
-    def __init__(self, quality=(30, 70)):
-        self.jpeg = JPEG(quality=quality)
-        self.to_tensor = ToTensor()
-        self.to_pil = ToPILImage()
+    def __init__(self, quality=(30, 100), p=0.5):
+        self.quality_range = quality
+        self.p = p
+        self.to_tensor = ToImage()     # Converts PIL → tensor
+        self.to_pil = ToPILImage()     # Converts tensor → PIL
 
     def __call__(self, img):
-        # img: PIL Image
-        # Convert PIL to uint8 tensor (C,H,W) on CPU
-        img_uint8 = torch.as_tensor(
-            torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes()))
-        ).view(img.size[1], img.size[0], len(img.getbands())).permute(2, 0, 1).contiguous()
+        if random.random() > self.p:
+            return img  # skip JPEG with probability 1 - p
 
-        # Apply JPEG compression/decompression
-        img_jpeg = self.jpeg(img_uint8)
+        # Convert PIL → tensor (uint8, C x H x W)
+        img_tensor = self.to_tensor(img)
 
-        # Convert back to PIL Image for downstream pipeline
-        img_pil = self.to_pil(img_jpeg)
-        return img_pil
+        # Sample a random quality
+        quality = random.randint(self.quality_range[0], self.quality_range[1])
+
+        # Apply JPEG compression
+        jpeg = JPEG(quality=quality)
+        img_jpeg = jpeg(img_tensor)
+
+        # Convert back to PIL if needed
+        return self.to_pil(img_jpeg)
 
 
 def build_transform(cfg, is_train=True, choices=None):
@@ -319,12 +323,12 @@ def _build_transform_train(cfg, choices, target_size, normalize):
 
     if "gaussian_blur" in choices:
         print(f"+ gaussian blur (kernel={cfg.INPUT.GB_K})")
-        gb_k, gb_p = cfg.INPUT.GB_K, cfg.INPUT.GB_P
-        tfm_train += [RandomApply([GaussianBlur(gb_k)], p=gb_p)]
+        gb_k, gb_p, gb_sigma = cfg.INPUT.GB_K, cfg.INPUT.GB_P, cfg.INPUT.GB_SIGMA
+        tfm_train += [RandomApply([GaussianBlur(gb_k, gb_sigma)], p=gb_p)]
 
     if "jpeg_compression" in choices:
         print(f"+ JPEG compression (quality={cfg.INPUT.JPEG_QUALITY})")
-        tfm_train += [JPEG(quality=cfg.INPUT.JPEG_QUALITY)]
+        tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
     print("+ to torch tensor of range [0, 1]")
     tfm_train += [ToTensor()]
@@ -378,9 +382,14 @@ def _build_transform_test(cfg, choices, target_size, normalize):
     print(f"+ {target_size} center crop")
     tfm_test += [CenterCrop(input_size)]
 
+    # if "gaussian_blur" in choices:
+    #     print(f"+ gaussian blur (kernel={cfg.INPUT.GB_K})")
+    #     gb_k, gb_p, gb_sigma = cfg.INPUT.GB_K, cfg.INPUT.GB_P, cfg.INPUT.GB_SIGMA
+    #     tfm_test += [RandomApply([GaussianBlur(gb_k, gb_sigma)], p=gb_p)]
+
     # if "jpeg_compression" in choices:
     #     print(f"+ JPEG compression (quality={cfg.INPUT.JPEG_QUALITY})")
-    #     tfm_test += [JPEG(quality=cfg.INPUT.JPEG_QUALITY)]
+    #     tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
     print("+ to torch tensor of range [0, 1]")
     tfm_test += [ToTensor()]
