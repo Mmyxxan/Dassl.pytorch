@@ -138,3 +138,4 @@ dmypy.json
 output/
 debug/
 /dassl/data/datasets/cnn_spot
+dassl/data/datasets/cnn_spot.zip

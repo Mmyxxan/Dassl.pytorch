@@ -337,6 +337,7 @@ def _build_transform_train(cfg, choices, target_size, normalize):
 
     if "gaussian_noise" in choices:
         print(f"+ gaussian noise (mean={cfg.INPUT.GN_MEAN}, sigma={cfg.INPUT.GN_STD})")
+        # Should we add RandomApply?
         tfm_train += [GaussianNoise(mean=cfg.INPUT.GN_MEAN, sigma=cfg.INPUT.GN_STD)]
 
     if "backbone_preprocessing" in choices:
