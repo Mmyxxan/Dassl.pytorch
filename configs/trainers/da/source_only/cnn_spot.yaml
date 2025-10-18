@@ -8,4 +8,4 @@ OPTIM:
   NAME: "sgd"
   LR: 0.002
   STEPSIZE: [20]
-  MAX_EPOCH: 2
+  MAX_EPOCH: 1
