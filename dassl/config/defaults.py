@@ -205,7 +205,7 @@ _C.TRAIN.COUNT_ITER = "train_x"
 # Test
 ###########################
 _C.TEST = CN()
-_C.TEST.EVALUATOR = "Classification"
+_C.TEST.EVALUATOR = "ClassificationmAP"
 _C.TEST.PER_CLASS_RESULT = False
 # Compute confusion matrix, which will be saved
 # to $OUTPUT_DIR/cmat.pt
