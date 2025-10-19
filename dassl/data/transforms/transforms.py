@@ -322,12 +322,12 @@ def _build_transform_train(cfg, choices, target_size, normalize):
         tfm_train += [RandomGrayscale(p=cfg.INPUT.RGS_P)]
 
     if "gaussian_blur" in choices:
-        print(f"+ gaussian blur (kernel={cfg.INPUT.GB_K})")
+        print(f"+ gaussian blur (p={cfg.INPUT.GB_P}, kernel={cfg.INPUT.GB_K}, sigma={cfg.INPUT.GB_SIGMA})")
         gb_k, gb_p, gb_sigma = cfg.INPUT.GB_K, cfg.INPUT.GB_P, cfg.INPUT.GB_SIGMA
         tfm_train += [RandomApply([GaussianBlur(gb_k, gb_sigma)], p=gb_p)]
 
     if "jpeg_compression" in choices:
-        print(f"+ JPEG compression (quality={cfg.INPUT.JPEG_QUALITY})")
+        print(f"+ JPEG compression (p={cfg.INPUT.JPEG_P}, quality={cfg.INPUT.JPEG_QUALITY})")
         tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
     print("+ to torch tensor of range [0, 1]")
@@ -382,14 +382,15 @@ def _build_transform_test(cfg, choices, target_size, normalize):
     print(f"+ {target_size} center crop")
     tfm_test += [CenterCrop(input_size)]
 
-    # if "gaussian_blur" in choices:
-    #     print(f"+ gaussian blur (kernel={cfg.INPUT.GB_K})")
-    #     gb_k, gb_p, gb_sigma = cfg.INPUT.GB_K, cfg.INPUT.GB_P, cfg.INPUT.GB_SIGMA
-    #     tfm_test += [RandomApply([GaussianBlur(gb_k, gb_sigma)], p=gb_p)]
+    if not cfg.INPUT.NO_TRANSFORM_TEST:
+        if "gaussian_blur" in choices:
+            print(f"+ gaussian blur (p={cfg.INPUT.GB_P}, kernel={cfg.INPUT.GB_K}, sigma={cfg.INPUT.GB_SIGMA})")
+            gb_k, gb_p, gb_sigma = cfg.INPUT.GB_K, cfg.INPUT.GB_P, cfg.INPUT.GB_SIGMA
+            tfm_test += [RandomApply([GaussianBlur(gb_k, gb_sigma)], p=gb_p)]
 
-    # if "jpeg_compression" in choices:
-    #     print(f"+ JPEG compression (quality={cfg.INPUT.JPEG_QUALITY})")
-    #     tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
+        if "jpeg_compression" in choices:
+            print(f"+ JPEG compression (p={cfg.INPUT.JPEG_P}, quality={cfg.INPUT.JPEG_QUALITY})")
+            tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
     print("+ to torch tensor of range [0, 1]")
     tfm_test += [ToTensor()]

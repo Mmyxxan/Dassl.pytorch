@@ -31,6 +31,7 @@ _C.INPUT.INTERPOLATION = "bilinear"
 _C.INPUT.TRANSFORMS = ()
 # If True, tfm_train and tfm_test will be None
 _C.INPUT.NO_TRANSFORM = False
+_C.INPUT.NO_TRANSFORM_TEST = True
 # Mean and std (default: ImageNet)
 _C.INPUT.PIXEL_MEAN = [0.485, 0.456, 0.406]
 _C.INPUT.PIXEL_STD = [0.229, 0.224, 0.225]
