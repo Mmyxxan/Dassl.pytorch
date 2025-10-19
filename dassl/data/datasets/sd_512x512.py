@@ -6,7 +6,7 @@ from .build import DATASET_REGISTRY
 from .base_dataset import Datum, DatasetBase
 
 @DATASET_REGISTRY.register()
-class SD512512(DatasetBase):
+class SD512x512(DatasetBase):
 
     dataset_dir = "deepfake_eval/sd_512x512/images/val"
 

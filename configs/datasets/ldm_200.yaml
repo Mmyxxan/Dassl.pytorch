@@ -1,0 +1,13 @@
+INPUT:
+  SIZE: (224, 224)
+  TRANSFORMS: ["backbone_preprocessing"]
+
+DATASET:
+  NAME: "LDM200"
+
+MODEL:
+  BACKBONE:
+    NAME: "fused_cnn_resnet50_clip_vit"
+  HEAD:
+    NAME: "binary_classifier"
+    DROPOUT: 0.2
