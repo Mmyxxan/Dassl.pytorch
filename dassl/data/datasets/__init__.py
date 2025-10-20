@@ -44,3 +44,6 @@ from .stylegan2 import *
 from .stylegan3 import *
 from .taming import *
 from .whichfaceisreal import *
+from .glide import *
+from .ldm import *
+from .dalle import *
