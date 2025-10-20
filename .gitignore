@@ -140,3 +140,4 @@ debug/
 /dassl/data/datasets/cnn_spot
 dassl/data/datasets/cnn_spot.zip
 dassl/data/datasets/deepfake_eval.zip
+output.zip
