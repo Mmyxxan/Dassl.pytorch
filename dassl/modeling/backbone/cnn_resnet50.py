@@ -23,9 +23,12 @@ class ResNet50(Backbone):
     def preprocess(image_tensor):
         return ResNet50.resnet_normalize(image_tensor.clone())  # Clone to avoid in-place ops
 
-    def __init__(self, freeze=True):
+    def __init__(self, freeze=True, pretrained=True):
         super().__init__()
-        self.model = resnet50(weights=ResNet50_Weights.DEFAULT)
+        if pretrained:
+            self.model = resnet50(weights=ResNet50_Weights.DEFAULT)
+        else:
+            self.model = resnet50()
 
         if freeze:
             for param in self.model.parameters():

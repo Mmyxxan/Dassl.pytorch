@@ -14,9 +14,12 @@ class CLIPViT(Backbone):
     def preprocess(image_tensor):
         return CLIPViT.clip_normalize(image_tensor.clone())
 
-    def __init__(self, model_name="openai/clip-vit-large-patch14", freeze=True):
+    def __init__(self, model_name="openai/clip-vit-large-patch14", freeze=True, pretrained=True):
         super().__init__()
-        self.model = CLIPVisionModel.from_pretrained(model_name)
+        if pretrained:
+            self.model = CLIPVisionModel.from_pretrained(model_name)
+        else:
+            self.model = CLIPVisionModel()
 
         if freeze:
             for param in self.model.parameters():

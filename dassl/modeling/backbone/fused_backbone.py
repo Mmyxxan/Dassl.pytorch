@@ -23,7 +23,7 @@ class FusedBackbone(Backbone):
         self.projections = nn.ModuleList()
 
         for backbone_cls in self.backbone_list:
-            model = backbone_cls(freeze=freeze)
+            model = backbone_cls(freeze=freeze, pretrained=pretrained)
             projection = nn.Linear(model._out_features, project_dim)
             self.backbones.append(model)
             self.projections.append(projection)
