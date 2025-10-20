@@ -1,4 +1,4 @@
-from transformers import CLIPVisionModel, CLIPImageProcessor
+from transformers import CLIPVisionModel, CLIPImageProcessor, CLIPVisionConfig
 from .build import BACKBONE_REGISTRY
 from .backbone import Backbone
 from torchvision import transforms
@@ -19,7 +19,9 @@ class CLIPViT(Backbone):
         if pretrained:
             self.model = CLIPVisionModel.from_pretrained(model_name)
         else:
-            self.model = CLIPVisionModel()
+            # Create a config object to initialize the model
+            config = CLIPVisionConfig.from_pretrained(model_name)  # Load the config from Hugging Face
+            self.model = CLIPVisionModel(config)  # Pass the config to the model constructor
 
         if freeze:
             for param in self.model.parameters():
