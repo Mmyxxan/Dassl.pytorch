@@ -136,7 +136,7 @@ _C.MODEL = CN()
 _C.MODEL.INIT_WEIGHTS = ""
 _C.MODEL.BACKBONE = CN()
 _C.MODEL.BACKBONE.NAME = ""
-_C.MODEL.BACKBONE.PRETRAINED = True
+_C.MODEL.BACKBONE.PRETRAINED = False
 # Definition of embedding layers
 _C.MODEL.HEAD = CN()
 # If none, do not construct embedding layers, the
