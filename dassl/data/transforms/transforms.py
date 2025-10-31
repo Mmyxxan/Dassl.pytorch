@@ -378,7 +378,7 @@ def _build_transform_test(cfg, choices, target_size, normalize):
 
     print(f"+ resize the smaller edge to {max(input_size)}")
     # tfm_test += [Resize(max(input_size), interpolation=interp_mode)]
-    tfm_test += [Resize((input_size, input_size), interpolation=interp_mode)]
+    tfm_test += [Resize(input_size, interpolation=interp_mode)]
 
     print(f"+ {target_size} center crop")
     tfm_test += [CenterCrop(input_size)]
