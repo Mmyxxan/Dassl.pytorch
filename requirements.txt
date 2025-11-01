@@ -13,4 +13,4 @@ regex
 wilds==1.2.2
 tabulate
 transformers
-clip @ git+https://github.com/openai/CLIP.git@a1d7683
+clip @ git+https://github.com/openai/CLIP.git@main
