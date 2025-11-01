@@ -384,7 +384,7 @@ def _build_transform_test(cfg, choices, target_size, normalize):
     interp_mode = INTERPOLATION_MODES[cfg.INPUT.INTERPOLATION]
     input_size = cfg.INPUT.SIZE
 
-    if "backbone_preprocessing_only" in choices:
+    if "backbone_preprocessing_only" not in choices:
         # print(f"+ resize the smaller edge to {max(input_size)}")
         # tfm_test += [Resize(max(input_size), interpolation=interp_mode)]
         print(f"+ resize to {target_size}")
@@ -403,7 +403,7 @@ def _build_transform_test(cfg, choices, target_size, normalize):
             print(f"+ JPEG compression (p={cfg.INPUT.JPEG_P}, quality={cfg.INPUT.JPEG_QUALITY})")
             tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
-    if "backbone_preprocessing_only" in choices:
+    if "backbone_preprocessing_only" not in choices:
         print("+ to torch tensor of range [0, 1]")
         tfm_test += [ToTensor()]
 
