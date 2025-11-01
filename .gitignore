@@ -141,3 +141,6 @@ debug/
 dassl/data/datasets/cnn_spot.zip
 dassl/data/datasets/deepfake_eval.zip
 output.zip
+/dassl/data/datasets/deepfake_eval
+dassl/data/datasets/stats_cnn_spot.py
+dassl/data/datasets/stats_deepfake_eval.py

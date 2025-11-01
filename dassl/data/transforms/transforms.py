@@ -13,13 +13,14 @@ from torchvision.transforms.functional import InterpolationMode
 from .autoaugment import SVHNPolicy, CIFAR10Policy, ImageNetPolicy
 from .randaugment import RandAugment, RandAugment2, RandAugmentFixMatch
 
-from dassl.modeling import FusedBackbone
+from dassl.modeling import FusedBackbone, clipmodel
 
 AVAI_CHOICES = [
     "random_flip",
     "random_resized_crop",
     "normalize",
     "backbone_preprocessing",
+    "backbone_preprocessing_only",
     "instance_norm",
     "random_crop",
     "random_translation",
@@ -45,7 +46,8 @@ INTERPOLATION_MODES = {
 }
 
 MODEL_TRANSFORMS = {
-    "fused_cnn_resnet50_clip_vit": FusedBackbone.preprocess
+    "fused_cnn_resnet50_clip_vit": FusedBackbone.preprocess,
+    "clip_model": clipmodel().preprocess,
 }
 
 class Random2DTranslation:
@@ -247,7 +249,7 @@ def _build_transform_train(cfg, choices, target_size, normalize):
     conditions = []
     conditions += ["random_crop" not in choices]
     conditions += ["random_resized_crop" not in choices]
-    if all(conditions):
+    if all(conditions) and "backbone_preprocessing_only" not in choices:
         print(f"+ resize to {target_size}")
         tfm_train += [Resize(input_size, interpolation=interp_mode)]
 
@@ -330,8 +332,9 @@ def _build_transform_train(cfg, choices, target_size, normalize):
         print(f"+ JPEG compression (p={cfg.INPUT.JPEG_P}, quality={cfg.INPUT.JPEG_QUALITY})")
         tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
-    print("+ to torch tensor of range [0, 1]")
-    tfm_train += [ToTensor()]
+    if "backbone_preprocessing_only" not in choices:
+        print("+ to torch tensor of range [0, 1]")
+        tfm_train += [ToTensor()]
 
     if "cutout" in choices:
         cutout_n = cfg.INPUT.CUTOUT_N
@@ -346,6 +349,10 @@ def _build_transform_train(cfg, choices, target_size, normalize):
 
     if "backbone_preprocessing" in choices:
         print("+ normalization per backbone")
+        tfm_train += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
+
+    if "backbone_preprocessing_only" in choices:
+        print("+ backbone processing only")
         tfm_train += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
 
     if "normalize" in choices:
@@ -371,18 +378,20 @@ def _build_transform_train(cfg, choices, target_size, normalize):
 
 def _build_transform_test(cfg, choices, target_size, normalize):
     print("Building transform_test")
+    
     tfm_test = []
 
     interp_mode = INTERPOLATION_MODES[cfg.INPUT.INTERPOLATION]
     input_size = cfg.INPUT.SIZE
 
-    # print(f"+ resize the smaller edge to {max(input_size)}")
-    # tfm_test += [Resize(max(input_size), interpolation=interp_mode)]
-    print(f"+ resize to {target_size}")
-    tfm_test += [Resize(input_size, interpolation=interp_mode)]
+    if "backbone_preprocessing_only" in choices:
+        # print(f"+ resize the smaller edge to {max(input_size)}")
+        # tfm_test += [Resize(max(input_size), interpolation=interp_mode)]
+        print(f"+ resize to {target_size}")
+        tfm_test += [Resize(input_size, interpolation=interp_mode)]
 
-    print(f"+ {target_size} center crop")
-    tfm_test += [CenterCrop(input_size)]
+        print(f"+ {target_size} center crop")
+        tfm_test += [CenterCrop(input_size)]
 
     if not cfg.INPUT.NO_TRANSFORM_TEST:
         if "gaussian_blur" in choices:
@@ -394,8 +403,9 @@ def _build_transform_test(cfg, choices, target_size, normalize):
             print(f"+ JPEG compression (p={cfg.INPUT.JPEG_P}, quality={cfg.INPUT.JPEG_QUALITY})")
             tfm_train += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
-    print("+ to torch tensor of range [0, 1]")
-    tfm_test += [ToTensor()]
+    if "backbone_preprocessing_only" in choices:
+        print("+ to torch tensor of range [0, 1]")
+        tfm_test += [ToTensor()]
 
     # if "gaussian_noise" in choices:
     #     print(f"+ gaussian noise (mean={cfg.INPUT.GN_MEAN}, sigma={cfg.INPUT.GN_STD})")
@@ -403,6 +413,10 @@ def _build_transform_test(cfg, choices, target_size, normalize):
 
     if "backbone_preprocessing" in choices:
         print("+ normalization per backbone")
+        tfm_test += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
+
+    if "backbone_preprocessing_only" in choices:
+        print("+ backbone processing only")
         tfm_test += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
 
     if "normalize" in choices:
