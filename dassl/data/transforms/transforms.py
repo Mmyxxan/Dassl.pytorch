@@ -376,8 +376,9 @@ def _build_transform_test(cfg, choices, target_size, normalize):
     interp_mode = INTERPOLATION_MODES[cfg.INPUT.INTERPOLATION]
     input_size = cfg.INPUT.SIZE
 
-    print(f"+ resize the smaller edge to {max(input_size)}")
+    # print(f"+ resize the smaller edge to {max(input_size)}")
     # tfm_test += [Resize(max(input_size), interpolation=interp_mode)]
+    print(f"+ resize to {target_size}")
     tfm_test += [Resize(input_size, interpolation=interp_mode)]
 
     print(f"+ {target_size} center crop")
