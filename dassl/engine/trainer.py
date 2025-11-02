@@ -18,8 +18,11 @@ from dassl.utils import (
 from dassl.modeling import build_head, build_backbone
 from dassl.evaluation import build_evaluator
 
+from types import SimpleNamespace
+
 from .clipping import clipmodel
 from .cnn_det import resnet50
+from dassl.cospy import CospyCalibrateDetector
 
 class SimpleNet(nn.Module):
     """A simple neural network composed of a CNN backbone
@@ -383,6 +386,17 @@ class SimpleTrainer(TrainerBase):
             self.model = clipmodel()
         elif cfg.MODEL.BACKBONE.NAME == "cnn_det":
             self.model = resnet50(num_classes=1)
+        elif cfg.MODEL.BACKBONE.NAME == "cospy":
+            args = SimpleNamespace(
+                semantic_weights_path = "output/cospy/model/semantic_weights.pth",
+                artifact_weights_path = "output/cospy/model/artifact_weights.pth",
+                classifier_weights_path = "output/cospy/model/classifier_weights.pth"
+            )
+            self.model = CospyCalibrateDetector(
+                semantic_weights_path=args.semantic_weights_path,
+                artifact_weights_path=args.artifact_weights_path)
+
+            self.model.load_weights(args.classifier_weights_path)
         else:
             self.model = SimpleNet(cfg, cfg.MODEL, self.num_classes)
         if cfg.MODEL.INIT_WEIGHTS:
@@ -420,11 +434,12 @@ class SimpleTrainer(TrainerBase):
 
         do_test = not self.cfg.TEST.NO_TEST
         if do_test:
-            if self.cfg.TEST.FINAL_MODEL == "best_val":
-                print("Deploy the model with the best val performance")
-                self.load_model(self.output_dir)
-            else:
-                print("Deploy the last-epoch model")
+            if self.cfg.MODEL.BACKBONE.NAME != "cospy":
+                if self.cfg.TEST.FINAL_MODEL == "best_val":
+                    print("Deploy the model with the best val performance")
+                    self.load_model(self.output_dir)
+                else:
+                    print("Deploy the last-epoch model")
             self.test()
 
         # Show elapsed time

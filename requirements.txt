@@ -14,3 +14,6 @@ wilds==1.2.2
 tabulate
 transformers
 clip @ git+https://github.com/openai/CLIP.git@main
+open_clip_torch
+diffusers
+opencv-python

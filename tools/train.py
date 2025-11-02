@@ -107,7 +107,8 @@ def main(args):
     trainer = build_trainer(cfg)
 
     if args.eval_only:
-        trainer.load_model(args.model_dir, epoch=args.load_epoch)
+        if cfg.MODEL.BACKBONE.NAME != "cospy":
+            trainer.load_model(args.model_dir, epoch=args.load_epoch)
         trainer.test()
         return
 

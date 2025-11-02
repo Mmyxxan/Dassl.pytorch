@@ -45,9 +45,21 @@ INTERPOLATION_MODES = {
     "nearest": InterpolationMode.NEAREST,
 }
 
+from torchvision import transforms
+
+def cospy_backbone_preprocess():
+    loadSize = 384
+    cropSize = 384
+    return transforms.Compose([
+        transforms.Resize(loadSize),
+        transforms.CenterCrop(cropSize),
+        transforms.ToTensor(),
+    ])
+
 MODEL_TRANSFORMS = {
     "fused_cnn_resnet50_clip_vit": FusedBackbone.preprocess,
     "clip_model": clipmodel().preprocess,
+    "cospy": cospy_backbone_preprocess(),
 }
 
 class Random2DTranslation:
@@ -353,7 +365,8 @@ def _build_transform_train(cfg, choices, target_size, normalize):
 
     if "backbone_preprocessing_only" in choices:
         print("+ backbone processing only")
-        tfm_train += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
+        if cfg.MODEL.BACKBONE.NAME in MODEL_TRANSFORMS:
+            tfm_train += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
 
     if "normalize" in choices:
         print(
@@ -417,7 +430,8 @@ def _build_transform_test(cfg, choices, target_size, normalize):
 
     if "backbone_preprocessing_only" in choices:
         print("+ backbone processing only")
-        tfm_test += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
+        if cfg.MODEL.BACKBONE.NAME in MODEL_TRANSFORMS:
+            tfm_test += [MODEL_TRANSFORMS[cfg.MODEL.BACKBONE.NAME]]
 
     if "normalize" in choices:
         print(

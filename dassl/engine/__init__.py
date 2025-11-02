@@ -5,3 +5,4 @@ from .da import *
 from .dg import *
 from .ssl import *
 from .SL import SupervisedLearning
+from dassl.cospy import CospyCalibrateDetector
