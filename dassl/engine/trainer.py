@@ -18,35 +18,8 @@ from dassl.utils import (
 from dassl.modeling import build_head, build_backbone
 from dassl.evaluation import build_evaluator
 
-import clip
-
-class LinearClassifier(torch.nn.Module):
-    def __init__(self, dim, num_labels=2):
-        super(LinearClassifier, self).__init__()
-        # torch.set_default_dtype(torch.float16)
-        self.num_labels = num_labels
-        self.linear = torch.nn.Linear(dim, num_labels)
-        self.linear.weight.data.normal_(mean=0.0, std=0.01)
-        self.linear.bias.data.zero_()
-
-    def forward(self, x):
-        # flatten
-        x = x.view(x.size(0), -1)
-        # linear layer
-        return self.linear(x)
-
-class clipmodel(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.feature_extractor, self.preprocess = clip.load("ViT-L/14", device="cpu") # self.preprecess will not be used during training, which is handled in Dataset class 
-        # self.fc = nn.Linear(768, 2)
-        self.fc = LinearClassifier(768, 2)
-
-    def forward(self, x):
-        # with torch.no_grad():
-        intermediate_output = self.feature_extractor.encode_image(x)
-        output = self.fc(intermediate_output)
-        return output
+from .clipping import clipmodel
+from .cnn_det import resnet50
 
 class SimpleNet(nn.Module):
     """A simple neural network composed of a CNN backbone
@@ -222,7 +195,10 @@ class TrainerBase:
 
             checkpoint = load_checkpoint(model_path)
             if "state_dict" not in checkpoint:
-                state_dict = checkpoint
+                if "model" in checkpoint:
+                    state_dict = checkpoint['model']
+                else:
+                    state_dict = checkpoint
                 epoch = -1
                 val_result = -1
             else:
@@ -405,6 +381,8 @@ class SimpleTrainer(TrainerBase):
         print("Building model")
         if cfg.MODEL.BACKBONE.NAME == "clip_model":
             self.model = clipmodel()
+        elif cfg.MODEL.BACKBONE.NAME == "cnn_det":
+            self.model = resnet50(num_classes=1)
         else:
             self.model = SimpleNet(cfg, cfg.MODEL, self.num_classes)
         if cfg.MODEL.INIT_WEIGHTS:

@@ -189,3 +189,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     main(args)
+
+# python tools/train.py --root "dassl/data/datasets" --trainer SupervisedLearning --dataset-config-file configs/datasets/faceswap.yaml --config-file configs/trainers/da/source_only/cnn_spot.yaml --output-dir output/cnn_spot_test_faceswap --eval-only --model-dir output/cnn_spot --load-epoch 1

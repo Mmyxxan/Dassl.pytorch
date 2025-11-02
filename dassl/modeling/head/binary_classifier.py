@@ -9,6 +9,7 @@ class BinaryClassifier(nn.Module):
             nn.Dropout(drop_out),
             nn.Linear(in_features, num_classes),
         )
+        # how to decrease dependency on one feature extractor by adjusting drop-out?
 
     def forward(self, x):
         return self.classifier(x)
