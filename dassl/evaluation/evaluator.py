@@ -200,6 +200,19 @@ class ClassificationmAP(EvaluatorBase):
         results["macro_f1"] = macro_f1
         results["average_precision"] = average_precision
 
+        # Save data for debugging
+        import csv
+        with open("debug_code1_probs.csv", "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["y_true", "y_prob", "y_pred"])
+            for yt, yp, yhat in zip(self._y_true, self._y_prob, self._y_pred):
+                writer.writerow([yt, yp, yhat])
+
+        results["accuracy"] = acc
+        results["error_rate"] = err
+        results["macro_f1"] = macro_f1
+        results["average_precision"] = average_precision
+
         print(
             "=> result\n"
             f"* total: {self._total:,}\n"

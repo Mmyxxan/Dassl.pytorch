@@ -21,17 +21,23 @@ class CLIPViT_FARE(Backbone):
         if pretrained:
             self.model, _, _ = open_clip.create_model_and_transforms(model_name)
         else:
-            self.model, _, _ = open_clip.create_model_and_transforms(model_name, pretrained=False)
+            self.model, _, _ = open_clip.create_model_and_transforms(model_name, pretrained=None)
+        self.visual = self.model.visual
+
+        # do we count parameters in the model or just visual encoder?
 
         if freeze:
             for param in self.model.parameters():
                 param.requires_grad = False
 
-        self._out_features = self.model.visual.output_dim
+        self._out_features = self.visual.ln_post.normalized_shape[0]
+        # print(self.out_features) # 1024
 
     def forward(self, x):
-        x = self.visual(x)  # (B, 1024) CLS token
-        return x
+        x = self.visual._embeds(x)
+        x = self.visual.transformer(x)
+        pooled, _ = self.visual._pool(x)
+        return pooled
 
 @BACKBONE_REGISTRY.register()
 def clip_vit_fare(freeze=True, pretrained=True, **kwargs):

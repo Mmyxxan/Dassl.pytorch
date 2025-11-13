@@ -417,9 +417,9 @@ def _build_transform_test(cfg, choices, target_size, normalize):
             print(f"+ JPEG compression (p={cfg.INPUT.JPEG_P}, quality={cfg.INPUT.JPEG_QUALITY})")
             tfm_test += [ApplyJPEG(quality=cfg.INPUT.JPEG_QUALITY, p=cfg.INPUT.JPEG_P)]
 
-    if "backbone_preprocessing_only" not in choices:
-        print("+ to torch tensor of range [0, 1]")
-        tfm_test += [ToTensor()]
+    # if "backbone_preprocessing_only" not in choices:
+    print("+ to torch tensor of range [0, 1]")
+    tfm_test += [ToTensor()]
 
     # if "gaussian_noise" in choices:
     #     print(f"+ gaussian noise (mean={cfg.INPUT.GN_MEAN}, sigma={cfg.INPUT.GN_STD})")

@@ -229,6 +229,8 @@ class ResNet50(nn.Module):
         x = x.view(x.size(0), -1)
         out = self.fc(x)  # [B, 1] if binary, else [B, C]
 
+        return out
+
         if self.fc.out_features == 1:
             # Convert single logit z -> two logits [0, z]
             z = out.squeeze(1)                # [B]
