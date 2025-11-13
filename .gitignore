@@ -136,6 +136,7 @@ dmypy.json
 
 # This project
 output/
+output_kaggle/
 debug/
 /dassl/data/datasets/cnn_spot
 dassl/data/datasets/cnn_spot.zip
@@ -144,3 +145,11 @@ output.zip
 /dassl/data/datasets/deepfake_eval
 dassl/data/datasets/stats_cnn_spot.py
 dassl/data/datasets/stats_deepfake_eval.py
+/blur_plots
+/results
+/robustness_plots
+*.csv
+tools/compare_probs.py
+tools/parse_res.py
+tools/parse_tables.py
+tools/generate_latex_tables.py

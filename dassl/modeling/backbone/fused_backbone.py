@@ -1,5 +1,6 @@
 from .cnn_resnet50 import ResNet50
 from .clip_vit import CLIPViT
+from .clip_vit_fare import CLIPViT_FARE
 from .build import BACKBONE_REGISTRY
 from .backbone import Backbone
 
@@ -8,8 +9,6 @@ import torch
 
 class FusedBackbone(Backbone):
 
-    backbone_list=[ResNet50, CLIPViT]
-
     @staticmethod
     def preprocess(shared_tensor):
         # print("+ normalization per backbone:")
@@ -17,8 +16,10 @@ class FusedBackbone(Backbone):
         #     print(f"  - {backbone_cls.__name__}")
         return [backbone_cls.preprocess(shared_tensor) for backbone_cls in FusedBackbone.backbone_list]
 
-    def __init__(self, freeze=True, project_dim=512, pretrained=True, **kwargs):
+    def __init__(self, backbone_list, freeze=True, project_dim=512, pretrained=True, **kwargs):
         super().__init__()
+        self.backbone_list = backbone_list
+
         self.backbones = nn.ModuleList()
         self.projections = nn.ModuleList()
 
@@ -39,4 +40,8 @@ class FusedBackbone(Backbone):
     
 @BACKBONE_REGISTRY.register()
 def fused_cnn_resnet50_clip_vit(freeze=True, **kwargs):
-    return FusedBackbone(freeze=freeze, **kwargs)
+    return FusedBackbone(backbone_list=[ResNet50, CLIPViT], freeze=freeze, **kwargs)
+
+@BACKBONE_REGISTRY.register()
+def fused_cnn_resnet50_robust_clip_vit(freeze=True, **kwargs):
+    return FusedBackbone(backbone_list=[ResNet50, CLIPViT_FARE], freeze=freeze, **kwargs)
