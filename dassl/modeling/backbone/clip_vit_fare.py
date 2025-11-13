@@ -29,11 +29,9 @@ class CLIPViT_FARE(Backbone):
 
         self._out_features = self.model.visual.output_dim
 
-    def forward(self, x, return_all_tokens=False):
-        vision_out = self.model.visual(x)
-        if return_all_tokens:
-            return vision_out
-        return vision_out[:, 0]  # CLS token
+    def forward(self, x):
+        x = self.visual(x)  # (B, 1024) CLS token
+        return x
 
 @BACKBONE_REGISTRY.register()
 def clip_vit_fare(freeze=True, pretrained=True, **kwargs):

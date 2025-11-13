@@ -29,10 +29,8 @@ class CLIPViT(Backbone):
 
         self._out_features = self.model.config.hidden_size # usually 1024 for large
 
-    def forward(self, x, return_all_tokens=False):
+    def forward(self, x):
         outputs = self.model(pixel_values=x)
-        if return_all_tokens:
-            return outputs.last_hidden_state
         return outputs.last_hidden_state[:, 0] # CLS token
 
 @BACKBONE_REGISTRY.register()
