@@ -9,12 +9,11 @@ import torch
 
 class FusedBackbone(Backbone):
 
-    @staticmethod
-    def preprocess(shared_tensor):
+    def preprocess(self, shared_tensor):
         # print("+ normalization per backbone:")
         # for backbone_cls in FusedBackbone.backbone_list:
         #     print(f"  - {backbone_cls.__name__}")
-        return [backbone_cls.preprocess(shared_tensor) for backbone_cls in FusedBackbone.backbone_list]
+        return [backbone_cls.preprocess(shared_tensor) for backbone_cls in self.backbone_list]
 
     def __init__(self, backbone_list, freeze=True, project_dim=512, pretrained=True, **kwargs):
         super().__init__()
