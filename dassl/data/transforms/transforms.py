@@ -13,7 +13,7 @@ from torchvision.transforms.functional import InterpolationMode
 from .autoaugment import SVHNPolicy, CIFAR10Policy, ImageNetPolicy
 from .randaugment import RandAugment, RandAugment2, RandAugmentFixMatch
 
-from dassl.modeling import FusedBackbone, clipmodel
+from dassl.modeling import FusedBackbone, clipmodel, ResNet50, CLIPViT, CLIPViT_FARE
 
 AVAI_CHOICES = [
     "random_flip",
@@ -57,8 +57,8 @@ def cospy_backbone_preprocess():
     ])
 
 MODEL_TRANSFORMS = {
-    "fused_cnn_resnet50_clip_vit": FusedBackbone(backbone_list=[]).preprocess,
-    "fused_cnn_resnet50_robust_clip_vit": FusedBackbone(backbone_list=[]).preprocess,
+    "fused_cnn_resnet50_clip_vit": FusedBackbone(backbone_list=[ResNet50, CLIPViT]).preprocess,
+    "fused_cnn_resnet50_robust_clip_vit": FusedBackbone(backbone_list=[ResNet50, CLIPViT_FARE]).preprocess,
     "clip_model": clipmodel().preprocess,
     "cospy": cospy_backbone_preprocess(),
 }
