@@ -58,6 +58,7 @@ def cospy_backbone_preprocess():
 
 MODEL_TRANSFORMS = {
     "fused_cnn_resnet50_clip_vit": FusedBackbone.preprocess,
+    "fused_cnn_resnet50_robust_clip_vit": FusedBackbone.preprocess,
     "clip_model": clipmodel().preprocess,
     "cospy": cospy_backbone_preprocess(),
 }
