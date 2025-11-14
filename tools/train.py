@@ -99,9 +99,6 @@ def main(args):
 
     if torch.cuda.is_available() and cfg.USE_CUDA:
         torch.backends.cudnn.benchmark = True
-
-    if args.eval_only:
-        cfg.MODEL.BACKBONE.PRETRAINED = False
     
     print_args(args, cfg)
     print("Collecting env info ...")
