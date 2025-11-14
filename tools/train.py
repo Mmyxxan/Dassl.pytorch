@@ -113,6 +113,8 @@ def main(args):
         return
 
     if not args.no_train:
+        if args.model_dir:
+            trainer.load_model(args.model_dir, epoch=args.load_epoch)
         trainer.train()
 
 
