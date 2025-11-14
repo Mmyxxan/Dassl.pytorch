@@ -1,13 +1,13 @@
 INPUT:
   SIZE: (224, 224)
-  TRANSFORMS: ["backbone_preprocessing_only"]
+  TRANSFORMS: ["backbone_preprocessing"]
 
 DATASET:
   NAME: "SD512x512"
 
 MODEL:
   BACKBONE:
-    NAME: "clip_model"
+    NAME: "fused_cnn_resnet50_clip_vit"
   HEAD:
     NAME: "binary_classifier"
     DROPOUT: 0.2

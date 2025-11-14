@@ -1,13 +1,13 @@
 INPUT:
   SIZE: (224, 224)
-  TRANSFORMS: ["normalize"]
+  TRANSFORMS: ["backbone_preprocessing"]
 
 DATASET:
   NAME: "FaceSwap"
 
 MODEL:
   BACKBONE:
-    NAME: "cnn_det"
+    NAME: "fused_cnn_resnet50_clip_vit"
   HEAD:
     NAME: "binary_classifier"
     DROPOUT: 0.2

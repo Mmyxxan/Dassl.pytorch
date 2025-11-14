@@ -1,31 +1,13 @@
 INPUT:
   SIZE: (224, 224)
-  TRANSFORMS: ["backbone_preprocessing_only", "normalize"]
-  # TRANSFORMS: ["jpeg_compression", "backbone_preprocessing_only"]
-  # TRANSFORMS: ["gaussian_blur", "backbone_preprocessing"]
-  # JPEG_P: 1.0
-  # JPEG_QUALITY: (100, 100)
-  JPEG_P: 1.0
-  JPEG_QUALITY: (75, 75)
-  # JPEG_P: 1.0
-  # JPEG_QUALITY: (50, 50)
-  # GB_P: 1.0
-  # GB_K: 21
-  # GB_SIGMA: 0.1
-  # GB_P: 1.0
-  # GB_K: 21
-  # GB_SIGMA: 1.0
-  # GB_P: 1.0
-  # GB_K: 21
-  # GB_SIGMA: 2.0
+  TRANSFORMS: ["backbone_preprocessing"]
 
 DATASET:
   NAME: "BigGAN"
 
 MODEL:
   BACKBONE:
-    NAME: "cnn_det"
-    # NAME: "co_spy"
+    NAME: "fused_cnn_resnet50_clip_vit"
   HEAD:
     NAME: "binary_classifier"
     DROPOUT: 0.2
