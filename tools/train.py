@@ -181,7 +181,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--no_tf_test",
-        type=str,
+        type=bool,
         default=False,
         help="apply no augmentation in test transform",
     )
