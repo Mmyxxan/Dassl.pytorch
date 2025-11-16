@@ -115,6 +115,11 @@ def main(args):
         trainer.test()
         return
 
+    if args.inspect_weights:
+        trainer.load_model(args.model_dir, epoch=args.load_epoch)
+        trainer.inspect_extractor_contributions()
+        return
+
     if not args.no_train:
         if args.model_dir:
             trainer.load_model(args.model_dir, epoch=args.load_epoch)
@@ -184,6 +189,12 @@ if __name__ == "__main__":
         type=bool,
         default=False,
         help="apply no augmentation in test transform",
+    )
+    parser.add_argument(
+        "--inspect_weights",
+        type=bool,
+        default=False,
+        help="Inspect weights only, no train, no eval",
     )
     parser.add_argument(
         "--load-epoch",

@@ -38,3 +38,37 @@ class SupervisedLearning(TrainerX):
         label = label.to(self.device)
         return input, label
 
+    def inspect_extractor_contributions(self):
+        backbone = self.model.backbone
+        
+        if not hasattr(backbone, "backbone_list"):
+            print("Backbone is not fused; no extractors to inspect.")
+            return
+
+        num_extractors = len(backbone.backbone_list)
+        project_dim = backbone.projections[0].out_features  
+
+        classifier = self.model.classifier           # linear layer
+        W = classifier.weight.detach()               # shape: (C, total_dim)
+
+        contributions = []
+        start = 0
+
+        for idx, extractor_cls in enumerate(backbone.backbone_list):
+            end = start + project_dim
+            W_block = W[:, start:end]                 # slice for this extractor
+
+            contrib = W_block.abs().sum().item()      # L1 importance
+
+            contributions.append((extractor_cls.__name__, contrib))
+            start = end
+
+        # normalize
+        total = sum(c for _, c in contributions)
+        contributions_pct = [(name, c, c / total * 100) for name, c in contributions]
+
+        print("\n=== Extractor Contribution Analysis ===")
+        for name, raw, pct in contributions_pct:
+            print(f"{name:<25} | Raw: {raw:10.4f} | {pct:6.2f}%")
+
+        return contributions_pct

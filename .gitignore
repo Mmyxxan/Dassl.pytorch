@@ -153,3 +153,5 @@ tools/compare_probs.py
 tools/parse_res.py
 tools/parse_tables.py
 tools/generate_latex_tables.py
+tools/compare_correlation.py
+tools/weight_dominance.py
