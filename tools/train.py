@@ -51,6 +51,9 @@ def reset_cfg(cfg, args):
     if args.head:
         cfg.MODEL.HEAD.NAME = args.head
 
+    if args.no_tf_test:
+        cfg.INPUT.NO_TRANSFORM_TEST = args.no_tf_test
+
 
 def extend_cfg(cfg):
     """
