@@ -180,6 +180,12 @@ if __name__ == "__main__":
         help="load model from this directory for eval-only mode",
     )
     parser.add_argument(
+        "--no_tf_test",
+        type=str,
+        default=False,
+        help="apply no augmentation in test transform",
+    )
+    parser.add_argument(
         "--load-epoch",
         type=int,
         help="load model weights at this epoch for evaluation"
