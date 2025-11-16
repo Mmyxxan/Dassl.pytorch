@@ -26,7 +26,7 @@ DATASET:
 
 MODEL:
   BACKBONE:
-    NAME: "fused_cnn_resnet50_robust_clip_vit"
+    NAME: "fused_cnn_resnet50_clip_vit"
   HEAD:
     NAME: "binary_classifier"
     DROPOUT: 0.2
